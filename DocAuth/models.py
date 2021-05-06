@@ -9,7 +9,7 @@ class Signature(db.Model):
     __tablename__ = "signature"
 
     user_id = Column(Integer, ForeignKey('user.id'), primary_key=True)
-    file_id = Column(Integer, ForeignKey('file.id'), primary_key=True)
+    file_id = Column(Integer, ForeignKey('file.file_hash'), primary_key=True)
     sign_date = Column(Date, nullable=False, default=datetime.now())
 
     document = relationship("Document", back_populates="signers")
@@ -27,7 +27,7 @@ class User(db.Model):
     passwd_hash = Column(String(64), nullable=False)
     register_date = Column(Date, nullable=False, default=datetime.now())
     is_org = Column(Boolean, default=False)
-    files = relationship("Document")
+    files = relationship("Document", backref="owner")
     signed_files = relationship("Signature", back_populates="signer")
 
 
@@ -36,9 +36,8 @@ class Document(db.Model):
     This class represents the data for each file checked on the database.
     """
     __tablename__ = "file"
-    id = Column(Integer, primary_key=True)
+    file_hash = Column(String(64), nullable=False, unique=True, primary_key=True)
     filename = Column(String(100), nullable=False)
-    file_hash = Column(String(64), nullable=False, unique=True)
     date_added = Column(Date, nullable=False, default=datetime.now())
     date_expire = Column(Date)
     is_contract = Column(Boolean, default=False)

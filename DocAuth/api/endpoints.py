@@ -9,16 +9,14 @@ from .utils import token_required, pw_hashf, is_hex
 api = Blueprint("api", __name__, url_prefix="/api")
 
 
-@api.route("/files/<id>", methods=["GET"])
-def getFiles(id):
-    if id:
-        doc = db.session.get(Document, id)
-    elif request.args.get("hash"):
-        doc = db.session.query(Document).filter_by(file_hash=request.args.get("hash")).first()[0]
-    else: 
-        return jsonify({"message" : "No hash or file ID given"}), 400
+@api.route("/files/<file_hash>", methods=["GET"])
+def getFiles(file_hash):
+    doc = db.session.get(Document, file_hash)
 
-    return jsonify({"filename" : doc.filename}), 200
+    if not doc:
+        return jsonify({"message" : "Invalid Hash"}), 400
+
+    return jsonify({"filename" : doc.filename, "owner" : doc.owner}), 200
 
 
 @api.route("/files", methods=["POST"])
@@ -31,7 +29,7 @@ def postFiles(user):
         # Chech if hash is valid.
         if len(file_hash) != 64 or not is_hex(file_hash):
             return jsonify({"message" : "Invalid Hash"})
-        possible_dup = db.session.query(Document.id).filter_by(file_hash=file_hash).first()
+        possible_dup = db.session.get(Document, file_hash)
         if possible_dup is not None:
             return jsonify({"message" : "Hash already exists", "id" : possible_dup.id})
 
@@ -51,10 +49,10 @@ def postFiles(user):
     return jsonify({"message" : "Please provide a hash and filename on the query"}), 400
 
 
-@api.route("/files/<file_id>/signature", methods=["PUT"])
+@api.route("/files/<file_hash>/signature", methods=["PUT"])
 @token_required
-def signFile(user, file_id):
-    document = db.session.get(Document, file_id)
+def signFile(user, file_hash):
+    document = db.session.get(Document, file_hash)
     signer = db.session.query(User).filter_by(username=user).first()
     signature = Signature(document=document, signer=signer)
     db.session.add(signature)
