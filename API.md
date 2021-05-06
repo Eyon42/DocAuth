@@ -2,10 +2,27 @@
 ## GET
 Api Docs
 
-# /sign
+# /files
 ## POST
-- Content: HASH
-- Credentials
+- Content:
+  - Hash
+  - filename
+- Options
+  - contract : bool
+  - expire_date
+- Return:
+  - Created Document
+
+# /files/{hash}|{id}?by_id=bool&
+## GET
+- Return:
+  - Document
+
+# /users/{id}
+# GET
+
+# /users/
+# POST
 
 # /verificate/{Hash}
 ## GET

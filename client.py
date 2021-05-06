@@ -13,11 +13,11 @@ file_hash = hashlib.sha256(bin_file.encode()).hexdigest()
 # POST REQUEST
 
 req_json = {
-    "filename" : FILE,
-    "file_hex_hash" : file_hash,
-    "date_expire" : None
+    "filename": FILE,
+    "file_hex_hash": file_hash,
+    "date_expire": None
 }
 
-r = requests.post(SERVER+"/register_file", json=req_json)
+r = requests.post(SERVER+"/api/files", json=req_json)
 
 print(r.text)
