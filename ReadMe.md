@@ -1,5 +1,5 @@
 The purposes of this project are:
-- Give me practise with building an entire site.
+- Give me practice with building an entire site.
 - Be a good portfolio piece
 - Maybe become a product
 
