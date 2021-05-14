@@ -1,5 +1,5 @@
 The purposes of this project are:
-- Give me practise with building an entire site.
+- Give me practice with building an entire site.
 - Be a good portfolio piece
 - Maybe become a product
 
@@ -16,7 +16,7 @@ When someone gets the file and needs to verify that the file has not been modifi
 ## Implentation
 - Backend Framework: Flask
 - Database: SQLite3 (SQLAlchemy allows me to easyly change this later)
-- Frontend Framework: TBA (Will make the API first)
+- Frontend Framework: TBD (Will make the API first)
 - Desktop client: Python CLI
 - API: REST API
 - Hashing function: SHA256
