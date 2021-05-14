@@ -1,17 +1,26 @@
 from flask import Flask
 
 from .api.endpoints import api
-from .extensions import db, migrate
+from .extensions import db, migrate, ma
 
-def create_app(config_file="settings.py"):
+def create_app(test_config=None):
     # app
     app = Flask(__name__)
 
-    app.config.from_pyfile(config_file)
+
+    if test_config is None:
+        # load the instance config, if it exists, when not testing
+        app.config.from_pyfile("settings.py", silent=True)
+    else:
+        # load the test config if passed in
+        app.config.update(test_config)
 
     app.register_blueprint(api)
 
     db.init_app(app)
-    migrate.init_app(app, db)
+    ma.init_app(app)
+
+    if not app.config["TESTING"]:
+        migrate.init_app(app, db)
 
     return app

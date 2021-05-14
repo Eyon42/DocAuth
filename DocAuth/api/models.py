@@ -1,8 +1,8 @@
-from sqlalchemy import Column, Integer, String, Date, Boolean, ForeignKey, Table
-from sqlalchemy.orm import relationship
 from datetime import datetime
+from sqlalchemy import Column, Integer, String, Date, Boolean, ForeignKey
+from sqlalchemy.orm import relationship
 
-from .extensions import db
+from DocAuth.extensions import db
 
 
 class Signature(db.Model):
@@ -18,7 +18,7 @@ class Signature(db.Model):
 class User(db.Model):
     """
     Can be created as a regular user(No Org) or Org user
-    But 
+    But
     """
     __tablename__ = "user"
     id = Column(Integer, primary_key=True)
