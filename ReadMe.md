@@ -56,5 +56,12 @@ When someone gets the file and needs to verify that the file has not been modifi
 - Database optimization.
 
 ## Decisions
-- Do I keep record of verifications? (Ip addresses, devices, etc. or maybe just a count)
-- Should I allow duplicated files in the database?(same hash)
+- Do I keep record of verifications? (Ip addresses, devices, etc. or maybe just a count)- Keep a record
+- Should I allow duplicated files in the database?(same hash)- Nope
+
+# To-do
+- Add user search and get user
+- Test user features
+- Create database and marshmallow schema for verification
+- Implement verification functionality
+- Test verification functionality

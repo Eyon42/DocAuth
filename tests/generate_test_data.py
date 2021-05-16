@@ -50,6 +50,13 @@ def create_fake_users(n, database, commit=True):
     return passwords
 
 
+def create_fake_file_hash():
+    """
+    Creates a random sha256 hash
+    """
+    return hashlib.sha256(fake.binary()).hexdigest()
+
+
 def create_fake_files(n, database, commit=True, is_contract=False):
     """
     Creates n fake files and add them to the database
@@ -61,7 +68,7 @@ def create_fake_files(n, database, commit=True, is_contract=False):
 
     for _ in range(n):
         filename = fake.file_name()
-        file_hash = hashlib.sha256(fake.binary()).hexdigest()
+        file_hash = create_fake_file_hash()
         if random.random() > 0.8:
             date_expire = fake.date_between(start_date="today", end_date="+30y")
         else:

@@ -1,3 +1,5 @@
+from marshmallow import Schema, fields
+
 from DocAuth.extensions import ma
 from .models import User, Document
 
@@ -13,9 +15,10 @@ class UserSchema(ma.SQLAlchemySchema):
     is_org = ma.auto_field()
 
 
-class RegisterSchema(ma.SQLAlchemySchema):
-    class Meta:
-        fields = ("username", "password", "name")
+class RegisterSchema(Schema):
+    username = fields.Str()
+    password = fields.Str()
+    name = fields.Str()
 
 
 class DocumentSchema(ma.SQLAlchemyAutoSchema):
@@ -26,3 +29,4 @@ class DocumentSchema(ma.SQLAlchemyAutoSchema):
 user_schema = UserSchema()
 doc_schema = DocumentSchema()
 reg_user_schema = RegisterSchema()
+verification_request = "TODO"

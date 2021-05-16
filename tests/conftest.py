@@ -6,7 +6,7 @@ import jwt
 
 import DocAuth
 from DocAuth.extensions import db as _db
-from .generate_test_data import create_fake_users, create_fake_files
+from .generate_test_data import create_fake_users, create_fake_files, create_fake_file_hash
 
 @pytest.fixture
 def app():
@@ -60,6 +60,11 @@ def sample_contract(app, db):
     with app.app_context():
         test_file = create_fake_files(1, db, is_contract=True)[0]
     return test_file
+
+
+@pytest.fixture
+def file_hash():
+    return create_fake_file_hash()
 
 
 @pytest.fixture
