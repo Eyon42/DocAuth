@@ -163,4 +163,4 @@ def login():
 def auth_check(user):
     # The user argument is nesessary even if it is not used by the endpoint.
     # It is sent as an argument by @token_required
-    return {"Message" : "If you can see this, you are logged in"}
+    return {"Message" : "If you can see this, you are logged in", "username":user}

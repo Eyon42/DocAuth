@@ -65,3 +65,5 @@ When someone gets the file and needs to verify that the file has not been modifi
 - Create database and marshmallow schema for verification
 - Implement verification functionality
 - Test verification functionality
+
+Idea: to store verification data, use a separate NO-SQL database, as the data required for verification does not fit nicely into the table model.(And you get to dip your fingers in MongoDB)
