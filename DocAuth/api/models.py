@@ -82,3 +82,4 @@ class VerificationData(db.Model):
 
     type = Column(String(50), nullable=False)
     data = Column(PickleType, nullable=False)
+    status = Column(String(50), nullable=False)
