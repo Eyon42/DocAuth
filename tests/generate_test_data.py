@@ -11,21 +11,8 @@ from DocAuth.api.utils import pw_hashf
 
 fake = Faker()
 
-def create_fake_data():
-    app = create_app()
 
-    with app.app_context():
-
-        # Fake user accounts
-        create_fake_users(5, db)
-
-        # Fake files
-        create_fake_signatures(8, db)
-
-        # Fake signatures
-        create_fake_signatures(13, db)
-
-def create_fake_users(n, database, commit=True):
+def create_fake_users(n, database, commit=True, is_org=False):
     """
     Creates n fake users and add them to the database
     If commit (default=True), commits the changes.
@@ -41,7 +28,7 @@ def create_fake_users(n, database, commit=True):
         passwd_hash = pw_hashf(passwd)
         register_date = fake.date_between(start_date="-2y", end_date="today")
         user = User(name=name, username=username, passwd_hash=passwd_hash,
-                    register_date=register_date)
+                    register_date=register_date, is_org=is_org)
 
         database.session.add(user)
 
@@ -73,11 +60,6 @@ def create_fake_files(n, database, commit=True, is_contract=False):
             date_expire = fake.date_between(start_date="today", end_date="+30y")
         else:
             date_expire = None
-
-        if is_contract:
-            is_contract = True
-        else:
-            is_contract = False
 
         owner_id = random.choice(user_ids)
 

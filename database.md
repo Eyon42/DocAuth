@@ -13,4 +13,12 @@ From this point on you have a project that is fully enabled to use database migr
 3. You will finally apply the changes to the database by running flask db upgrade.
 
 This cycle repeats every time new changes to the database schema are needed.
-[Source](https://blog.miguelgrinberg.com/post/how-to-add-flask-migrate-to-an-existing-project)
+[Source](https://blog.migflauelgrinberg.com/post/how-to-add-flask-migrate-to-an-existing-project)
+
+## commands
+
+```
+flask db init
+flask db migrate
+flask db upgrade
+```

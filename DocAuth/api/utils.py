@@ -6,6 +6,8 @@ from marshmallow import ValidationError
 import jwt
 
 
+DATE_FORMAT = "%Y-%m-%d"
+
 hex_digits = set(string.hexdigits)
 
 def is_hex(s):

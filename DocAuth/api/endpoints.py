@@ -1,12 +1,15 @@
 from datetime import datetime
-from flask import Blueprint, request, current_app
+import re
+from typing import ValuesView
+from flask import Blueprint, request, current_app, jsonify
 from sqlalchemy.exc import NoResultFound
+from sqlalchemy import or_
 import jwt
 
 from DocAuth.extensions import db
 from .models import Document, User, Signature
-from .schemas import reg_user_schema, doc_schema, verification_request
-from .utils import token_required, pw_hashf, is_hex, validate_json
+from .schemas import reg_user_schema, doc_schema, verification_request, user_schema, verification_schema
+from .utils import token_required, pw_hashf, is_hex, validate_json, DATE_FORMAT
 
 api = Blueprint("api", __name__, url_prefix="/api")
 
@@ -64,27 +67,98 @@ def signFile(user, file_hash):
 
 # Users
 
-@api.route("/users/<user_id>", methods=["GET"])
+@api.route("/users/<int:user_id>", methods=["GET"])
 def getUser(user_id):
-    return {"message" : "WIP"}, 404
+    user = User.query.get(user_id)
+
+    if user:
+        return user_schema.dump(user), 200
+
+    return {"message" : "User not found"}, 404
 
 
 @api.route("/users/", methods=["GET"])
 def searchUser():
     """
     Query arguments:
-        - filter by : ["is_org", "register_date", "Verification type/level"]
+        - search : ["search"]
+        - filter by : ["is_org", "register_date_from", "register_date_until", "verification"]
+        - pagination : ["per_page", "page"]
     """
-    return {"message" : "WIP"}, 404
+
+    args = request.args
+
+    query = User.query
+
+    if search_q := args.get("search"):
+        query = query.filter(or_(
+                *[
+                    i.like(f"%{search_q}%")
+                    for i in [
+                        User.name,
+                        User.username,
+                    ]
+                ]
+            ))
+
+    if args.get("is_org") == "True":
+        query = query.filter_by(is_org=True)
+    elif args.get("is_org") == "False":
+        query = query.filter_by(is_org=False)
+
+    # Maybe try to avoid duplication for date ranges
+    if from_date_str := args.get("register_date_from"):
+        try:
+            from_date = datetime.strptime(from_date_str, DATE_FORMAT)
+            query = query.filter(User.register_date >= from_date)
+        except ValueError:
+            return {"message" : f"Invalid date format, correct format is '{DATE_FORMAT}'"}
+
+    if from_date_str := args.get("register_date_until"):
+        try:
+            until_date = datetime.strptime(from_date_str, DATE_FORMAT)
+            query = query.filter(User.register_date <= until_date)
+        except ValueError:
+            return {"message" : f"Invalid date format, correct format is '{DATE_FORMAT}'"}
+
+    # Verification filtering
+    if v_types := args.get("verification"):
+        query = query.filter(User.verification.in_(v_types))
+    
+    # Pagination
+    if per_page := args.get("per_page"):
+        per_page = int(per_page)
+        if page := args.get("page"):
+            page = int(page)
+        else:
+            page = 1
+        
+        pagination = query.paginate(per_page=per_page, page=page, error_out=True)
+        
+        return {
+            "users" : [user_schema.dump(i) for i in pagination.items],
+            "page" : page,
+            "has_prev" : pagination.has_prev,
+            "has_next" : pagination.has_next,
+        }, 200
+
+    # Flask does not jsonify lists automatically, like it does with dicts
+    return jsonify([user_schema.dump(i) for i in query.all()]), 200
 
 # Verification
-@api.route("/users/<user_id>/verification", methods=["GET"])
-def showVerification(user_id):
+@api.route("/users/<username>/verification", methods=["GET"])
+@token_required
+def showVerification(user, username):
+    if user != username:
+        return {"message" : f"You are not {username}"}, 401
+
+    user = User.query.filter_by(username=user).first()
     """
     List the user's account verifications.
     Only a user can access their own's verifications
     """
-    return {"message" : "WIP"}, 404
+    
+    return {"verification:" : [verification_schema.dump(i) for i in user.verification]}, 404
 
 
 @api.route("/users/<user_id>/verification/requests", methods=["GET", "POST"])
@@ -100,7 +174,7 @@ def requestVerication(user, user_id, data=None):
         pass
     else:
         pass
-    return {"message" : "WIP"}, 404
+    return {"message" : "WIP"}, 200
 
 
 # Auth
