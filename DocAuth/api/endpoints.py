@@ -1,14 +1,14 @@
 from datetime import datetime
-import re
-from typing import ValuesView
 from flask import Blueprint, request, current_app, jsonify
 from sqlalchemy.exc import NoResultFound
 from sqlalchemy import or_
+from marshmallow import ValidationError
 import jwt
 
 from DocAuth.extensions import db
-from .models import Document, User, Signature
-from .schemas import reg_user_schema, doc_schema, verification_request, user_schema, verification_schema
+from .models import Document, User, Signature, VerificationData
+from .schemas import reg_user_schema, doc_schema, \
+                     user_schema, verification_schema, ver_data_validators
 from .utils import token_required, pw_hashf, is_hex, validate_json, DATE_FORMAT
 
 api = Blueprint("api", __name__, url_prefix="/api")
@@ -158,23 +158,48 @@ def showVerification(user, username):
     Only a user can access their own's verifications
     """
     
-    return {"verification:" : [verification_schema.dump(i) for i in user.verification]}, 404
+    return {"verification:" : [verification_schema.dump(i) for i in user.verification]}, 200
 
 
-@api.route("/users/<user_id>/verification/requests", methods=["GET", "POST"])
+@api.route("/users/<username>/verification/requests", methods=["GET", "POST"])
 @token_required
-@validate_json(verification_request)
-def requestVerication(user, user_id, data=None):
+def requestVerication(user, username):
     """
     GET: List the user's account verification requests.
     POST: Make a verification request.
     Only a user can access their own's verification requests
     """
+    if user != username:
+        return {"message" : f"You are not {username}"}, 401
+
+    user_id = User.query.filter_by(username=username).first().id
+
     if request.method == "GET":
-        pass
+        verifications = VerificationData.query.filter_by(user_id=user_id).all()
+
+        ver_requests = []
+        for ver in verifications:
+            if ver.status != "Verified":
+                ver_requests.append(verification_schema.dump(ver))
+
+        return {"Active requests" : ver_requests}, 200
     else:
-        pass
-    return {"message" : "WIP"}, 200
+        v_type = request.args.get("type")
+        
+        if v_type not in ver_data_validators.keys():
+            return {"message" : "Verification type was invalid or not provided"}, 400
+
+        try:
+            data = ver_data_validators[v_type].load(request.json)
+        except ValidationError as err:
+            return {"message" : "Verification data not provided or in wrong format", "error" : err.messages}, 400
+
+        ver = VerificationData(user_id=user_id, type=v_type, data=data, status="In Process")
+
+        db.session.add(ver)
+        db.session.commit()
+
+        return {"Verification Status" : "In Process"}, 200
 
 
 # Auth

@@ -3,7 +3,6 @@ venv/
 
 
 db.sqlite
-migrations
 
 
 *.pyc

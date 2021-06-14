@@ -15,11 +15,11 @@ When someone gets the file and needs to verify that the file has not been modifi
 
 ## Implentation
 - Backend Framework: Flask
-- Database: SQLite3 (SQLAlchemy allows me to easyly change this later)
-- Frontend Framework: TBD (Will make the API first)
+- Database: SQLite3 (SQLAlchemy allows me to easily change this later)
+- Frontend Framework: Vue
 - Desktop client: Python CLI
 - API: REST API
-- Hashing function: SHA256
+- Hashing function: SHA256. This might be overkill
 
 ## Security risks
 - Someone accessing the database
@@ -49,7 +49,6 @@ When someone gets the file and needs to verify that the file has not been modifi
 - Extra functions such as individual profiles associated with an institution
 
 ## Things I need to figure out
-- How to structure a REST API
 - Add TLS
 - Authentication
 - Database security
@@ -60,10 +59,7 @@ When someone gets the file and needs to verify that the file has not been modifi
 - Should I allow duplicated files in the database?(same hash)- Nope
 
 # To-do
-- Add user search and get user
-- Test user features
-- Create database and marshmallow schema for verification
 - Implement verification functionality
 - Test verification functionality
-
-Idea: to store verification data, use a separate NO-SQL database, as the data required for verification does not fit nicely into the table model.(And you get to dip your fingers in MongoDB)
+- Test user features
+- Change hashing function. Tests are showing that file operations take too long.

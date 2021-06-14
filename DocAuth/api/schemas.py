@@ -17,16 +17,11 @@ class UserSchema(ma.SQLAlchemySchema):
     is_org = ma.auto_field()
 
 
-class RegisterSchema(Schema):
-    username = fields.Str()
-    password = fields.Str()
-    name = fields.Str()
-
-
 class DocumentSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = Document
         include_fk = True
+
 
 class VerificationSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
@@ -40,9 +35,38 @@ class VerificationSchema(ma.SQLAlchemyAutoSchema):
         data["data"] = json.loads(data["data"].replace("'", "\""))
         return data
 
+# Useful validators
+
+class RegisterSchema(Schema):
+    username = fields.Str()
+    password = fields.Str()
+    name = fields.Str()
+
+# Verification data schemas
+
+ver_data_validators = dict()
+
+class PhoneVerData(Schema):
+    number = fields.Str()
+ver_data_validators["phone"] = PhoneVerData()
+
+class EmailVerData(Schema):
+    mail = fields.Str()
+ver_data_validators["e-mail"] = EmailVerData()
+
+class WebsiteVerData(Schema):
+    site = fields.Str()
+ver_data_validators["website"] = WebsiteVerData()
+
+class PhoneInterviewVerData(Schema):
+    interviewer_name = fields.Str()
+    interviewer_contact = fields.Str()
+    notes = fields.Str()
+ver_data_validators["phone-interview"] = PhoneInterviewVerData()
+
+# Instanciate all
 
 user_schema = UserSchema()
 doc_schema = DocumentSchema()
 reg_user_schema = RegisterSchema()
-verification_request = "TODO"
 verification_schema = VerificationSchema()
