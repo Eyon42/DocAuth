@@ -5,6 +5,7 @@ from flask import request, current_app
 from marshmallow import ValidationError
 import jwt
 
+from .models import User
 
 DATE_FORMAT = "%Y-%m-%d"
 
@@ -13,21 +14,28 @@ hex_digits = set(string.hexdigits)
 def is_hex(s):
     return all(c in hex_digits for c in s)
 
-def token_required(f):
-    @wraps(f)
-    def decorated(*args, **kwargs):
-        token = request.args.get("token")
+def token_required(admin=False):
+    def token_wrapper(f):
+        @wraps(f)
+        def decorated(*args, **kwargs):
+            token = request.args.get("token")
 
-        if not token:
-            return {"message" : "Token is missing"}, 403
+            if not token:
+                return {"message" : "Token is missing"}, 403
 
-        try:
-            data = jwt.decode(token, current_app.config["SECRET_KEY"], "HS256")
-        except jwt.DeocodeError:
-            return {"message" : "Token is invalid"}, 403
+            try:
+                data = jwt.decode(token, current_app.config["SECRET_KEY"], "HS256")
+            except (jwt.DecodeError, jwt.ExpiredSignatureError):
+                return {"message" : "Token is invalid"}, 403
 
-        return f(*args, **kwargs, user=data["user"])
-    return decorated
+            if admin:
+                is_admin = User.query.filter_by(username=data["user"]).first().admin
+                if not is_admin:
+                    return {"message" : "Restricted"}, 403
+
+            return f(*args, **kwargs, user=data["user"])
+        return decorated
+    return token_wrapper
 
 def validate_json(schema):
     """

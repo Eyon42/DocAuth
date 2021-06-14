@@ -30,6 +30,7 @@ class VerificationSchema(ma.SQLAlchemyAutoSchema):
 
     @decorators.post_dump
     def deserialize_pickle_bin(self, data, **kwargs):
+        # pylint: disable=unused-argument
         # For some reason, marshmallow serializes the dict to a string.
         # So this is nesessary.
         data["data"] = json.loads(data["data"].replace("'", "\""))

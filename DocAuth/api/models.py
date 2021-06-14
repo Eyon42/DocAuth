@@ -30,6 +30,7 @@ class User(db.Model):
     passwd_hash = Column(String(64), nullable=False)
     register_date = Column(Date, nullable=False, default=datetime.now())
     is_org = Column(Boolean, default=False)
+    admin = Column(Boolean, default=False)
 
     verification = relationship("VerificationData")
 
@@ -85,4 +86,3 @@ class VerificationData(db.Model):
     status = Column(String(50), nullable=False)
     request_date = Column(Date, nullable=False, default=datetime.now())
     verification_date = Column(Date)
-

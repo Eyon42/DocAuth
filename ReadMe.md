@@ -62,4 +62,5 @@ When someone gets the file and needs to verify that the file has not been modifi
 - Implement verification functionality
 - Test verification functionality
 - Test user features
+- Test admin permission
 - Change hashing function. Tests are showing that file operations take too long.

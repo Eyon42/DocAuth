@@ -26,7 +26,7 @@ def getFiles(file_hash):
 
 
 @api.route("/files", methods=["POST"])
-@token_required
+@token_required()
 @validate_json(doc_schema)
 def postFiles(user, validated_json_data):
     data = validated_json_data
@@ -49,7 +49,7 @@ def postFiles(user, validated_json_data):
 
 
 @api.route("/files/<file_hash>/signature", methods=["PUT"])
-@token_required
+@token_required()
 def signFile(user, file_hash):
     document = db.session.get(Document, file_hash)
 
@@ -124,7 +124,7 @@ def searchUser():
     # Verification filtering
     if v_types := args.get("verification"):
         query = query.filter(User.verification.in_(v_types))
-    
+
     # Pagination
     if per_page := args.get("per_page"):
         per_page = int(per_page)
@@ -132,9 +132,9 @@ def searchUser():
             page = int(page)
         else:
             page = 1
-        
+
         pagination = query.paginate(per_page=per_page, page=page, error_out=True)
-        
+
         return {
             "users" : [user_schema.dump(i) for i in pagination.items],
             "page" : page,
@@ -147,22 +147,22 @@ def searchUser():
 
 # Verification
 @api.route("/users/<username>/verification", methods=["GET"])
-@token_required
+@token_required()
 def showVerification(user, username):
-    if user != username:
-        return {"message" : f"You are not {username}"}, 401
-
-    user = User.query.filter_by(username=user).first()
     """
     List the user's account verifications.
     Only a user can access their own's verifications
     """
-    
+    if user != username:
+        return {"message" : f"You are not {username}"}, 401
+
+    user = User.query.filter_by(username=user).first()
+
     return {"verification:" : [verification_schema.dump(i) for i in user.verification]}, 200
 
 
 @api.route("/users/<username>/verification/requests", methods=["GET", "POST"])
-@token_required
+@token_required()
 def requestVerication(user, username):
     """
     GET: List the user's account verification requests.
@@ -185,14 +185,15 @@ def requestVerication(user, username):
         return {"Active requests" : ver_requests}, 200
     else:
         v_type = request.args.get("type")
-        
+
         if v_type not in ver_data_validators.keys():
             return {"message" : "Verification type was invalid or not provided"}, 400
 
         try:
             data = ver_data_validators[v_type].load(request.json)
         except ValidationError as err:
-            return {"message" : "Verification data not provided or in wrong format", "error" : err.messages}, 400
+            return {"message" : "Verification data not provided or in wrong format",
+                    "error" : err.messages}, 400
 
         ver = VerificationData(user_id=user_id, type=v_type, data=data, status="In Process")
 
@@ -258,7 +259,7 @@ def login():
 
 
 @api.route("/test/auth", methods=["GET"])
-@token_required
+@token_required()
 def auth_check(user):
     # The user argument is nesessary even if it is not used by the endpoint.
     # It is sent as an argument by @token_required
