@@ -3,13 +3,13 @@
 This is my "Toy Product". It's here to help me learn how it's like to build and manage a full software project. Also, this is currently my main portfolio piece showcasing how I work.
 
 ## Current state of the project:
-- Backend API in Flask
+- Backend REST API in Flask
   - User authentication with jwt
   - SQLite database with SQLAlchemy and migrations
   - Marshmallow Schemas for easier validation and serialization
   - Basic API endpoints
 - Tests with pytest
-- POSTman setup for manual API testing during developement
+- POSTman setup for manual API testing during developement (Not in the repo)
 - Source control with Git
 
 ## Future goals:
@@ -68,7 +68,10 @@ When someone gets the file and needs to verify that the file has not been modifi
   - User features
   - Admin permission
   - Performance profiling on tests. The file tests are taking too long
+  - Figure out how to add pytest fixtures for celery workers and the RabbitMQ instances (Maybe for that just leave the docker container running)
+  - Test celery tasks
 - Add check for signer-whitelist when signing
+- Add option to hide verification data (While showing status)
 - Continue API documentation.(Seach for a way to generate it automatically)
 - Begin general project documentation
 
