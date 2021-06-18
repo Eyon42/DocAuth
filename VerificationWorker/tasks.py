@@ -1,5 +1,4 @@
 from .celery import app
-
 from .db import models, db_session
 
 
