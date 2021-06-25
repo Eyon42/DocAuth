@@ -9,7 +9,7 @@ from DocAuth.extensions import db
 from .models import Document, User, Signature, VerificationData
 from .schemas import reg_user_schema, doc_schema, \
                      user_schema, verification_schema, ver_data_validators
-from .utils import token_required, pw_hashf, is_hex, validate_json, DATE_FORMAT
+from .utils import token_required, pw_hashf, is_hex, validate_json, verification_actions, DATE_FORMAT
 
 api = Blueprint("api", __name__, url_prefix="/api")
 
@@ -194,6 +194,8 @@ def requestVerication(user, username):
         except ValidationError as err:
             return {"message" : "Verification data not provided or in wrong format",
                     "error" : err.messages}, 400
+
+        data = verification_actions(v_type, data)
 
         ver = VerificationData(user_id=user_id, type=v_type, data=data, status="In Process")
 

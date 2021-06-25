@@ -22,3 +22,13 @@ flask db init
 flask db migrate
 flask db upgrade
 ```
+
+# PostgreSQL
+``` python
+DB_URI = "postgresql://{user}:{password}@{host}:5432/{database}"
+```
+## [psycopg2-binary](https://pypi.org/project/psycopg2/)
+
+This is the python postgres driver. 
+
+The binary package is a practical choice for development and testing but in production it is advised to use the package built from sources.

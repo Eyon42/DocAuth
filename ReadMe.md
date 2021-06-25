@@ -73,6 +73,7 @@ When someone gets the file and needs to verify that the file has not been modifi
 - Add check for signer-whitelist when signing
 - Add option to hide verification data (While showing status)
 - Continue API documentation.(Seach for a way to generate it automatically)
+- Implement logging
 - Begin general project documentation
 
 ## Verification methods:

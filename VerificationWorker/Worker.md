@@ -27,3 +27,12 @@ $ docker start rabbitmq [-a]
 $ celery -A tasks worker --loglevel=INFO --autoscale 12
 ```
 Note: --autoscale n : n = number of cores
+
+# Verification workflows
+
+## Email
+
+1. User sends verification requests
+   - New requests of the same type overwrite the current request.
+2. He gets sent an email with a verification link
+3. He clicks the link and gets verified
