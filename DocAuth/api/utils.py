@@ -1,11 +1,13 @@
 import hashlib
 import string
+import random
 from functools import wraps
 from flask import request, current_app
 from marshmallow import ValidationError
 import jwt
 
 from .models import User
+from VerificationWorker.tasks import send_verification_email
 
 DATE_FORMAT = "%Y-%m-%d"
 
@@ -59,3 +61,29 @@ def validate_json(schema):
 
 def pw_hashf(pw):
     return hashlib.sha256(pw.encode()).hexdigest()
+
+def generate_verification_code():
+    # Very simple code. A six digit number
+    return str(random.randint(0,10e5)).zfill(6)
+
+def verification_actions(v_type, data):
+    if v_type == "e-mail":
+        code = generate_verification_code()
+        data["verification_code"] = code
+        message = f"Verification link sent to {data['mail']}. Please check your spam folder"
+        send_verification_email(data["mail"], code)
+
+    elif v_type == "phone":
+        message = "WIP"
+
+    elif v_type == "website":
+        message = "WIP"
+
+    elif v_type == "phone-interview":
+        message = "WIP"
+
+    else:
+        # If you get here, something went wrong upstream.
+        message = "Invalid verification method."
+        
+    return data, message

@@ -83,6 +83,6 @@ class VerificationData(db.Model):
 
     type = Column(String(50), nullable=False)
     data = Column(PickleType, nullable=False)
-    status = Column(String(50), nullable=False)
+    status = Column(String(50), nullable=False) # Can be "In Process", "Verified" or "Expired"
     request_date = Column(Date, nullable=False, default=datetime.now())
     verification_date = Column(Date)

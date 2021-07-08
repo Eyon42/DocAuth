@@ -11,8 +11,7 @@ def get_first_user(session):
 
 
 @app.task
-@db_session
-def send_verification_email(session, username, mail):
+def send_verification_email(mail, verification_code):
 
     # To Do:
     # generate_verification_link()
@@ -21,6 +20,13 @@ def send_verification_email(session, username, mail):
         # An api endpoint with a query argument for verification key
         # The enpoint validates the key and changes the validation status
 
-    verification_link = generate_verification_link(username, mail)
-    content = f"Verification code: {verification_link}"
-    send_mail(mail, "Doc Auth Account Verification", content, sender="ADMIN")
+    link_to_end_point = "" #TO-Do
+    verification_link = f"{link_to_end_point}/?verification_code={verification_code}"
+    content = f"""
+    <a href={verification_link}>click this link<\a> [WIP]"
+    Or POST this to "{link_to_end_point}"
+    {{
+        verification_code: {verification_code}
+    }}
+    """
+    send_mail(mail, "Doc Auth Account Verification", content, sender="VERIFICATION")

@@ -61,8 +61,13 @@ When someone gets the file and needs to verify that the file has not been modifi
 
 # Developement Notes
 
+## Inmediate To-Do
+- Finish up email verification by link.
+- Fix verification email formatting
+
 ## General TO-DO
-- Implement verification functionality
+- **Implement email verification functionality**
+- Implement phone verification functionality(over telegram and maybe whats app)
 - Testing
   - Verification functionality
   - User features

@@ -1,5 +1,6 @@
 from datetime import datetime
 from flask import Blueprint, request, current_app, jsonify
+from flask.globals import session
 from sqlalchemy.exc import NoResultFound
 from sqlalchemy import or_
 from marshmallow import ValidationError
@@ -172,8 +173,10 @@ def requestVerication(user, username):
     if user != username:
         return {"message" : f"You are not {username}"}, 401
 
-    user_id = User.query.filter_by(username=username).first().id
+    user_mod = User.query.filter_by(username=username).first()
+    user_id = user_mod.id
 
+    # Check verification status
     if request.method == "GET":
         verifications = VerificationData.query.filter_by(user_id=user_id).all()
 
@@ -183,28 +186,68 @@ def requestVerication(user, username):
                 ver_requests.append(verification_schema.dump(ver))
 
         return {"Active requests" : ver_requests}, 200
+
+    # Request verification
     else:
         v_type = request.args.get("type")
 
+        # Check if the verification type requested is valid
         if v_type not in ver_data_validators.keys():
             return {"message" : "Verification type was invalid or not provided"}, 400
 
+        # Check if there are previous verification attempts of the same type 
+        for v in user_mod.verification:
+            if v.type == v_type:
+                if v.status == "In Process":
+                    # We invalidate previous attempts
+                    v.status == "Expired"
+                elif v.status == "Verified":
+                    # Perhaps, in the future, change this to allow multiple verifications
+                    # of the same type.
+                    return {"error" : f"You have already made a {v_type} verification"}, 400
+
+        # Validate and load the data
         try:
             data = ver_data_validators[v_type].load(request.json)
         except ValidationError as err:
             return {"message" : "Verification data not provided or in wrong format",
                     "error" : err.messages}, 400
+        
 
-        data = verification_actions(v_type, data)
+        # This is where the magic happens.
+        # In the case of the e-mail. It generates a code and mails it (through a celery worker)
+        # The return value is a dict with the email and the verification code and a message for the client.
+        data, message = verification_actions(v_type, data)
 
         ver = VerificationData(user_id=user_id, type=v_type, data=data, status="In Process")
 
         db.session.add(ver)
         db.session.commit()
 
-        return {"Verification Status" : "In Process"}, 200
+        return {"Verification Status" : "In Process", "message" : message}, 200
 
+@api.route("/verification/<v_type>/code", methods=["POST", "GET"])
+@token_required()
+def verify_with_code(user, v_type):
+    if request.method == "POST":
+        if v_type == "e-mail":
+            # Fetch verification object
+            user = User.query.filter_by(username=user).first()
+            verification = [v for v in user.verification if v.type==v_type and v.status=="In Process"][0]
 
+            # Check codes
+            user_code = verification.data["verification_code"]
+            code = str(request.json["verification_code"])
+            if user_code == code:
+                verification.status = "Verified"
+                verification.verification_date = datetime.now()
+                db.session.commit()
+                return {"message" : "Succesfully verified"}, 200
+            return {"error" : "wrong verification code"}, 401
+        else:
+            return {"error" : "Invalid verification type"}, 400
+    else:
+        return {"message" : "WIP"}
 # Auth
 @api.route("/register", methods=["POST"])
 @validate_json(reg_user_schema)

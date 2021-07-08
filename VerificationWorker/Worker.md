@@ -33,6 +33,6 @@ Note: --autoscale n : n = number of cores
 ## Email
 
 1. User sends verification requests
-   - New requests of the same type overwrite the current request.
+   - New requests of the same type invalidate the current request.
 2. He gets sent an email with a verification link
 3. He clicks the link and gets verified
