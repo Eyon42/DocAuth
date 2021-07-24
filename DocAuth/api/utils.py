@@ -66,12 +66,12 @@ def generate_verification_code():
     # Very simple code. A six digit number
     return str(random.randint(0,10e5)).zfill(6)
 
-def verification_actions(v_type, data):
+def verification_actions(v_type, data, link_to_end_point):
     if v_type == "e-mail":
         code = generate_verification_code()
         data["verification_code"] = code
         message = f"Verification link sent to {data['mail']}. Please check your spam folder"
-        send_verification_email(data["mail"], code)
+        send_verification_email(data["mail"], code, link_to_end_point)
 
     elif v_type == "phone":
         message = "WIP"

@@ -1,5 +1,5 @@
 from datetime import datetime
-from flask import Blueprint, request, current_app, jsonify
+from flask import Blueprint, request, current_app, jsonify, url_for
 from flask.globals import session
 from sqlalchemy.exc import NoResultFound
 from sqlalchemy import or_
@@ -200,7 +200,7 @@ def requestVerication(user, username):
             if v.type == v_type:
                 if v.status == "In Process":
                     # We invalidate previous attempts
-                    v.status == "Expired"
+                    v.status = "Expired"
                 elif v.status == "Verified":
                     # Perhaps, in the future, change this to allow multiple verifications
                     # of the same type.
@@ -217,37 +217,43 @@ def requestVerication(user, username):
         # This is where the magic happens.
         # In the case of the e-mail. It generates a code and mails it (through a celery worker)
         # The return value is a dict with the email and the verification code and a message for the client.
-        data, message = verification_actions(v_type, data)
+        link_to_end_point = request.host_url + url_for("api.verify_with_code", v_type="e-mail")[1:] # cuts the "/"
+        data, message = verification_actions(v_type, data, link_to_end_point)
 
         ver = VerificationData(user_id=user_id, type=v_type, data=data, status="In Process")
-
+        
         db.session.add(ver)
         db.session.commit()
 
         return {"Verification Status" : "In Process", "message" : message}, 200
 
-@api.route("/verification/<v_type>/code", methods=["POST", "GET"])
+@api.route("/verification/<v_type>/code", methods=["POST"])
 @token_required()
 def verify_with_code(user, v_type):
-    if request.method == "POST":
-        if v_type == "e-mail":
-            # Fetch verification object
-            user = User.query.filter_by(username=user).first()
-            verification = [v for v in user.verification if v.type==v_type and v.status=="In Process"][0]
+    
+    if v_type == "e-mail":
+        # Fetch verification object
+        user = User.query.filter_by(username=user).first()
+        verification = [v for v in user.verification if v.type==v_type and v.status=="In Process"][0]
 
-            # Check codes
-            user_code = verification.data["verification_code"]
-            code = str(request.json["verification_code"])
-            if user_code == code:
-                verification.status = "Verified"
-                verification.verification_date = datetime.now()
-                db.session.commit()
-                return {"message" : "Succesfully verified"}, 200
-            return {"error" : "wrong verification code"}, 401
+        # Check codes
+        code = str(request.json["verification_code"])
+        user_code = verification.data["verification_code"]
+        if user_code == code:
+            verification.status = "Verified"
+            verification.verification_date = datetime.now()
+            db.session.commit()
         else:
-            return {"error" : "Invalid verification type"}, 400
+            return {"error" : "wrong verification code"}, 401
+        
+        return {"message" : "Succesfully verified"}, 200
+
+    # elif v_type == "other verification type" 
+    #     pass
     else:
-        return {"message" : "WIP"}
+        return {"error" : "Invalid verification type"}, 400
+
+
 # Auth
 @api.route("/register", methods=["POST"])
 @validate_json(reg_user_schema)

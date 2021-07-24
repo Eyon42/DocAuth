@@ -2,7 +2,9 @@ import smtplib
 import ssl
 import os
 from dotenv import load_dotenv
-from email.message import EmailMessage
+#from email.message import EmailMessage
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 
 SMTP_SERVER = "smtp.gmail.com"
 PORT = 587
@@ -21,11 +23,15 @@ def send_mail(recievers, subject, content, sender="ADMIN"):
     server.login(email, password)
 
     # Assemble message
-    m = EmailMessage()
-    m.set_content(content)
+    m = MIMEMultipart('alternative')
     m["Subject"] = subject
     m["From"] = email
     m["To"] = recievers
+
+    part1 = MIMEText(content["text"], 'plain')
+    part2 = MIMEText(content["html"], 'html')
+    m.attach(part1)
+    m.attach(part2)
 
     server.send_message(m)
     server.quit()

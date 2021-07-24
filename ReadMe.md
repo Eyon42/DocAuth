@@ -62,12 +62,6 @@ When someone gets the file and needs to verify that the file has not been modifi
 # Developement Notes
 
 ## Inmediate To-Do
-- Finish up email verification by link.
-- Fix verification email formatting
-
-## General TO-DO
-- **Implement email verification functionality**
-- Implement phone verification functionality(over telegram and maybe whats app)
 - Testing
   - Verification functionality
   - User features
@@ -75,11 +69,19 @@ When someone gets the file and needs to verify that the file has not been modifi
   - Performance profiling on tests. The file tests are taking too long
   - Figure out how to add pytest fixtures for celery workers and the RabbitMQ instances (Maybe for that just leave the docker container running)
   - Test celery tasks
+
+## General TO-DO
 - Add check for signer-whitelist when signing
 - Add option to hide verification data (While showing status)
 - Continue API documentation.(Seach for a way to generate it automatically)
 - Implement logging
 - Begin general project documentation
+
+## Future small To-Do
+- Implement phone verification functionality(over telegram and maybe whats app)
+- Nicer verification E-mail
+- More streamlined verification (Maybe front-end integration. Or remove login needed)
+- Fix or remove db access for celery worker(circular import problems)
 
 ## Verification methods:
 For now these are the current verification methods to implement
